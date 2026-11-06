@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash 
 # À lancer UNE SEULE FOIS sur la VM (Ubuntu) pour l'installer.
 # Usage : bash setup_vm.sh https://github.com/TON_PSEUDO/sncf-retards-mlops.git
 set -euo pipefail
