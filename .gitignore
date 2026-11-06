@@ -1,0 +1,14 @@
+.env
+data/*.csv
+__pycache__/
+*.pyc
+.venv/
+venv/
+mlruns/
+*.db
+rapport_locust*.html
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/terraform.tfvars
+terraform/.terraform.lock.hcl
+sncf_mlops.pem

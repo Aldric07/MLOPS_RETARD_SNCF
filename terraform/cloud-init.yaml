@@ -1,0 +1,11 @@
+#cloud-config
+# Exécuté automatiquement au premier démarrage de la VM
+package_update: true
+packages:
+  - git
+  - curl
+  - openssl
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - usermod -aG docker ${user}
+  - sudo -u ${user} git clone ${repo_url} /home/${user}/sncf-retards-mlops

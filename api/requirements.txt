@@ -1,0 +1,8 @@
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+mlflow-skinny==2.16.2
+scikit-learn==1.5.2
+pandas==2.2.3
+numpy==1.26.4
+scipy==1.13.1
+psycopg2-binary==2.9.10

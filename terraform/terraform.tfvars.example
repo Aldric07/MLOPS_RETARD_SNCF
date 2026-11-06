@@ -1,0 +1,5 @@
+# Copie ce fichier en terraform.tfvars et remplis-le
+subscription_id = "00000000-0000-0000-0000-000000000000"
+repo_url        = "https://github.com/TON_PSEUDO/sncf-retards-mlops.git"
+# Sous Windows, mets le chemin complet, ex : "C:/Users/yoann/.ssh/id_ed25519.pub"
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"

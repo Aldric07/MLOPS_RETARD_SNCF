@@ -1,0 +1,92 @@
+# Lance tout le système avec : docker compose up -d --build
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.2
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --artifacts-destination /mlflow/artifacts
+      --serve-artifacts
+    volumes:
+      - mlflowdata:/mlflow
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      retries: 30
+    restart: unless-stopped
+
+  trainer:
+    build:
+      context: .
+      dockerfile: training/Dockerfile
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      RETRAIN: ${RETRAIN:-0}
+      REFRESH_DATA: ${REFRESH_DATA:-0}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+    deploy:
+      replicas: ${API_REPLICAS:-3}   # scaling horizontal : 3 copies de l'API
+    depends_on:
+      postgres:
+        condition: service_healthy
+      trainer:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8000:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    environment:
+      API_URL: http://nginx
+    ports:
+      - "8501:8501"
+    depends_on:
+      - nginx
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  mlflowdata:
