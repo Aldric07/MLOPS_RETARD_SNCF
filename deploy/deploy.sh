@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash 
 # Déploiement en une commande depuis ton Mac :
 #   ./deploy/deploy.sh azureuser@IP_DE_LA_VM
 set -euo pipefail
