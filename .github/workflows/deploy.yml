@@ -1,0 +1,35 @@
+# Pipeline CD : à chaque push sur main, on vérifie la config puis on déploie sur la VM.
+name: CD - Déploiement sur la VM
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VM_HOST: ${{ secrets.VM_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier les fichiers Python
+        run: python -m py_compile common/features.py training/train.py api/app/*.py ui/app.py
+
+      - name: Vérifier docker-compose.yml
+        run: cp .env.example .env && docker compose config -q
+
+      - name: Déployer sur la VM
+        if: env.VM_HOST != ''
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 20m
+          script: |
+            cd ~/sncf-retards-mlops
+            git pull origin main
+            docker compose up -d --build
+            docker compose ps
