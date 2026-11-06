@@ -2,7 +2,7 @@
 # À lancer UNE SEULE FOIS sur la VM (Ubuntu) pour l'installer.
 # Usage : bash setup_vm.sh https://github.com/TON_PSEUDO/sncf-retards-mlops.git
 set -euo pipefail
-REPO_URL="${1:?Donne l'URL du repo GitHub}"
+REPO_URL="${1:?URL du repo manquante}"
 
 if ! command -v docker >/dev/null; then
   curl -fsSL https://get.docker.com | sudo sh        # installe Docker + docker compose
