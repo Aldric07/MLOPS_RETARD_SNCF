@@ -3,5 +3,5 @@ WORKDIR /app
 COPY training/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY common ./common
-COPY training/train.py .
+COPY training/*.py ./
 CMD ["python", "train.py"]
